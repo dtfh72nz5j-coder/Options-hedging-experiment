@@ -1,0 +1,300 @@
+<title>Why μ Drops Out</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" id="MathJax-script" async></script>
+<style>
+  :root{
+    --paper:      #eef1ef;
+    --paper-raised:#f8faf8;
+    --ink:        #1c2622;
+    --ink-soft:   #51625a;
+    --rule:       #c9d2cc;
+    --accent:     #2e6f63;
+    --accent-soft:#e2ece8;
+    --gold:       #a97423;
+    --gold-soft:  #f3e9d3;
+    --code-bg:    #e2e8e2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:      #121815;
+      --paper-raised:#1b241f;
+      --ink:        #e7ece8;
+      --ink-soft:   #9fb0a8;
+      --rule:       #2c3830;
+      --accent:     #5fbaa5;
+      --accent-soft:#1d3b34;
+      --gold:       #dcac52;
+      --gold-soft:  #3a301b;
+      --code-bg:    #202b24;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #121815;
+    --paper-raised:#1b241f;
+    --ink:        #e7ece8;
+    --ink-soft:   #9fb0a8;
+    --rule:       #2c3830;
+    --accent:     #5fbaa5;
+    --accent-soft:#1d3b34;
+    --gold:       #dcac52;
+    --gold-soft:  #3a301b;
+    --code-bg:    #202b24;
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    padding-inline: 20px;
+    padding-block: 48px 80px;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  h1,h2{ font-family: 'Spectral', Georgia, serif; text-wrap: balance; }
+  .mono{ font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace; }
+
+  .sheet{
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  header.masthead{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1{
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .dek{
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  section{ margin-bottom: 40px; }
+  .step-head{
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .step-num{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+  h2{
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+  }
+  p{ margin: 0 0 14px 0; max-width: 64ch; }
+  p:last-child{ margin-bottom: 0; }
+
+  .eq{
+    overflow-x: auto;
+    padding: 6px 4px;
+  }
+  .eq mjx-container{ color: inherit; }
+
+  .keybox{
+    background: var(--gold-soft);
+    border-left: 3px solid var(--gold);
+    border-radius: 2px;
+    padding: 16px 18px;
+    margin: 18px 0;
+  }
+  .keybox .label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .callout{
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 14px 18px;
+    margin: 18px 0;
+  }
+  .callout .label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .codecard{
+    background: var(--paper-raised);
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin: 18px 0;
+  }
+  .codecard .filename{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .codecard .filename::before{
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+  .codecard pre{
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: var(--ink);
+    background: var(--code-bg);
+    padding: 10px 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  .rule{
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 40px 0;
+  }
+
+  .closing{
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  .closing strong{ color: var(--ink); }
+
+  footer{
+    margin-top: 44px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="eyebrow">options-hedging &middot; derivation note</div>
+    <h1>Why μ Drops Out</h1>
+    <p class="dek">The discrete delta-hedging error is a gamma effect driven by volatility &mdash; the stock's drift never enters the calculation. Here's where that falls out of the maths.</p>
+  </header>
+
+  <section>
+    <div class="step-head">
+      <span class="step-num">01</span>
+      <h2>One step of a delta-hedged portfolio</h2>
+    </div>
+    <p>Between two rebalance dates you hold a fixed hedge: short one call, long \(\Delta_t\) shares, where \(\Delta_t\) was set at the <em>last</em> rebalance. As the stock now moves by \(dS\), a Taylor expansion of the option price picks up a curvature term that your fixed hedge can't see:</p>
+    <div class="eq">\[ dC = \frac{\partial C}{\partial t}\,dt \;+\; \Delta_t\,dS \;+\; \tfrac{1}{2}\Gamma_t\,(dS)^2 \;+\;\dots \]</div>
+    <p>\(\Gamma_t = \partial \Delta_t/\partial S\) is <strong>gamma</strong>: how fast delta itself moves. Your hedge P&amp;L over the step is "what the stock position earned" minus "what the option now owes." The linear \(\Delta_t\,dS\) terms cancel exactly &mdash; that's delta-hedging doing its one job &mdash; leaving only theta and gamma:</p>
+    <div class="eq">\[ d(\text{hedge P\&L}) = \Delta_t\,dS - dC = -\frac{\partial C}{\partial t}\,dt - \tfrac{1}{2}\Gamma_t\,(dS)^2 \]</div>
+    <p>Substitute the Black-Scholes PDE, which every option price satisfies by construction, \( \frac{\partial C}{\partial t} + rS\Delta_t + \tfrac12\sigma^2 S^2\Gamma_t = rC \), and the risk-free financing on your cash account absorbs every \(r\)-term. What's left:</p>
+    <div class="keybox">
+      <div class="label">after the PDE substitution</div>
+      \[ d(\text{hedge P\&L}) \;\approx\; \tfrac{1}{2}\Gamma_t\Big[\,\sigma^2 S_t^2\,dt \;-\; (dS)^2\,\Big] \]
+    </div>
+    <p>No \(\mu\) anywhere yet. Everything now hinges on how \((dS)^2\) itself behaves.</p>
+  </section>
+
+  <section>
+    <div class="step-head">
+      <span class="step-num">02</span>
+      <h2>Squaring a random step</h2>
+    </div>
+    <p>Under GBM, over a small step, \(dS \approx \mu S\,dt + \sigma S\sqrt{dt}\,Z\) with \(Z\sim N(0,1)\). Square it and sort by power of \(dt\):</p>
+    <div class="eq">\[ (dS)^2 \;\approx\; \underbrace{\sigma^2 S^2\,dt\,Z^2}_{\text{order } dt} \;+\; \underbrace{2\mu\sigma S^2\,dt^{3/2} Z}_{\text{order } dt^{3/2}} \;+\; \underbrace{\mu^2 S^2\,dt^{2}}_{\text{order } dt^{2}} \]</div>
+    <p>As \(dt\) shrinks &mdash; which is exactly what hedging more frequently does &mdash; every \(\mu\)-containing term vanishes faster than the \(\sigma^2 dt\,Z^2\) term. That's the whole story in one line:</p>
+    <div class="callout">
+      <div class="label">the itô fact underneath this</div>
+      Drift moves a path's <em>average</em> location &mdash; a first-order effect in \(dt\). Volatility governs the path's <em>squared</em> wiggle, and squaring doesn't shrink it away, because \(E[Z^2]=1\) regardless of how small \(dt\) gets. Informally: \((dW)^2 \to dt\), deterministically, no matter how fine you slice time.
+    </div>
+  </section>
+
+  <section>
+    <div class="step-head">
+      <span class="step-num">03</span>
+      <h2>What survives</h2>
+    </div>
+    <p>Drop the higher-order terms and substitute back in:</p>
+    <div class="keybox">
+      <div class="label">leading-order hedging error, one step</div>
+      \[ d(\text{hedge P\&L}) \;\approx\; \tfrac{1}{2}\,\Gamma_t\,\sigma^2 S_t^2\,\big(Z^2 - 1\big)\,dt \]
+    </div>
+    <p>Three consequences fall out immediately:</p>
+    <p><strong>Mean zero.</strong> \(E[Z^2]=1\), so \(E[Z^2-1]=0\) &mdash; consistent with every daily-hedge P&amp;L mean landing near \$0 in the Monte Carlo runs.</p>
+    <p><strong>Driven by \(\Gamma\), \(\sigma\), and \(S\) &mdash; never \(\mu\).</strong> Summing these (roughly independent) terms across all rebalancing intervals in a path gives the total terminal hedging error; its variance is built entirely from gamma and volatility.</p>
+    <p><strong>The \(1/\sqrt{n}\) scaling.</strong> Each of \(n\) rebalancing intervals contributes a zero-mean term of size \(O(dt)=O(1/n)\). Summing \(n\) roughly-independent terms gives a total variance of \(O(n \cdot (1/n)^2) = O(1/n)\) &mdash; so the <em>standard deviation</em> of terminal hedging error scales like \(1/\sqrt{n}\), exactly the pattern in the RMSE numbers: monthly 1.92 &rarr; weekly 0.95 &rarr; daily 0.44.</p>
+  </section>
+
+  <section>
+    <div class="step-head">
+      <span class="step-num">04</span>
+      <h2>Connecting it back to the code</h2>
+    </div>
+    <p>In <span class="mono">hedging.py</span>, every rebalance computes exactly this gamma quantity, just in discrete form:</p>
+    <div class="codecard">
+      <div class="filename">hedging.py</div>
+      <pre>trade = delta_t - delta_prev
+cash -= trade * S_t</pre>
+    </div>
+    <p><span class="mono">delta_t - delta_prev</span> is the discrete stand-in for \(\Gamma_t\,dS\) &mdash; how much delta moved because the stock moved. \(\mu\) never appears in <span class="mono">black_scholes_call</span> or <span class="mono">call_delta</span> at all; it only ever enters <span class="mono">simulate_gbm_paths</span>, and even there it washes out of the hedging P&amp;L for the reason above.</p>
+    <p>This is also why mis-specifying \(\sigma\) hit so much harder than \(\mu\) ever could. If you hedge using \(\sigma_{\text{implied}}\) while the world actually realises \(\sigma_{\text{real}}\), the cancellation in Step 3 breaks: \(E[Z^2]=1\) still holds under the <em>real</em> measure, but it's being multiplied by \(\sigma_{\text{implied}}^2\) instead of \(\sigma_{\text{real}}^2\). The mean of the leading-order term becomes</p>
+    <div class="eq">\[ E\big[d(\text{hedge P\&L})\big] \;\approx\; \tfrac{1}{2}\,\Gamma_t\,S_t^2\,\big(\sigma_{\text{implied}}^2 - \sigma_{\text{real}}^2\big)\,dt \]</div>
+    <p>which is <em>systematically</em> non-zero &mdash; a first-order effect, not something that averages away. Since a call's \(\Gamma>0\), that sign matches the experiment precisely: realised 15&percnt; against implied 20&percnt; gave \(\sigma_{\text{implied}}^2 > \sigma_{\text{real}}^2\) and a <strong>positive</strong> mean P&amp;L (\(+\$1.97\)); realised 25&percnt; flipped the sign to \(-\$1.99\).</p>
+  </section>
+
+  <hr class="rule">
+
+  <p class="closing">Next natural check: rerun <span class="mono">simulate_gbm_paths</span> with \(\mu=0.08\) instead of \(\mu=0.04\), same seed, and compare the hedging P&amp;L histograms. <strong>Step 2's argument predicts they should be almost indistinguishable</strong> &mdash; a good way to see the derivation land as an actual number rather than just algebra.</p>
+
+  <footer>
+    <span>delta-hedging derivation</span>
+    <span>options-hedging project</span>
+  </footer>
+
+</div>
